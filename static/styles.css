@@ -1,0 +1,303 @@
+/* 청호나이스 렌탈 총판 - 커스텀 스타일 */
+
+/* 전역 스타일 */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 스크롤바 커스텀 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* 헤더 메뉴 호버 효과 */
+.menu-item .submenu {
+  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+  transform: translateY(-10px);
+}
+
+.menu-item:hover .submenu {
+  transform: translateY(0);
+}
+
+/* 배너 슬라이더 */
+.banner-slide {
+  transition: opacity 1s ease-in-out;
+}
+
+.banner-indicator {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.banner-indicator:hover {
+  transform: scale(1.2);
+}
+
+/* 제품 카드 */
+.product-card {
+  transition: all 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+}
+
+/* 하단 퀵메뉴 애니메이션 */
+#bottom-quick-menu {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 실시간 알림 */
+#realtime-notification {
+  animation: slideInFromRight 0.5s ease-out;
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* 모바일 메뉴 */
+#mobile-menu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+#mobile-menu:not(.hidden) {
+  max-height: 500px;
+}
+
+/* 로딩 스피너 */
+.spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #2563eb;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 프로모션 태그 */
+.promotion-tag {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* 텍스트 라인 제한 */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  #left-quick-menu {
+    display: none;
+  }
+  
+  #bottom-quick-menu form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  #bottom-quick-menu input,
+  #bottom-quick-menu select,
+  #bottom-quick-menu button {
+    width: 100%;
+  }
+}
+
+/* 제품 상세 페이지 탭 스타일 */
+.tab-button {
+  transition: all 0.3s ease;
+}
+
+.tab-button.active {
+  border-bottom: 3px solid #2563eb;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 워터타입 뱃지 */
+.water-type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.water-type-badge:hover {
+  transform: scale(1.05);
+}
+
+/* 관리자 페이지 스타일 */
+.admin-nav-button {
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+}
+
+.admin-nav-button.active {
+  border-bottom-color: #2563eb;
+  color: #2563eb;
+  background-color: #eff6ff;
+}
+
+/* 테이블 스타일 */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th {
+  background-color: #f3f4f6;
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.admin-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-table tr:hover {
+  background-color: #f9fafb;
+}
+
+/* 버튼 호버 효과 */
+.btn-hover-scale {
+  transition: transform 0.2s ease;
+}
+
+.btn-hover-scale:hover {
+  transform: scale(1.05);
+}
+
+/* 모달 백드롭 */
+.modal-backdrop {
+  backdrop-filter: blur(4px);
+}
+
+/* 폼 입력 포커스 */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  ring: 2px;
+  ring-color: #2563eb;
+  border-color: #2563eb;
+}
+
+/* 체크박스 스타일 */
+input[type="checkbox"] {
+  cursor: pointer;
+  width: 1rem;
+  height: 1rem;
+  accent-color: #2563eb;
+}
+
+/* 툴팁 */
+.tooltip {
+  position: relative;
+}
+
+.tooltip:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.5rem;
+  background-color: #1f2937;
+  color: white;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+  white-space: nowrap;
+  z-index: 100;
+}
+
+/* 프린트 스타일 */
+@media print {
+  header, footer, #bottom-quick-menu, #left-quick-menu, #realtime-notification {
+    display: none;
+  }
+}
