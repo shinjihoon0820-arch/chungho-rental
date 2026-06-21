@@ -252,7 +252,18 @@ document.getElementById('ev-form').addEventListener('submit', async function(e){
   } finally { btn.disabled=false; btn.textContent=o; }
 });
 
-render(DEFAULTS);
+(async function(){
+  var ev = DEFAULTS;
+  try{
+    var r = await fetch('/api/event', {cache:'no-store'});
+    var ep = await r.json();
+    if(ep && typeof ep==='object' && Object.keys(ep).length){
+      ev = Object.assign({}, DEFAULTS, ep);
+      ['thanks','tradein','combo','business'].forEach(function(k){ if(ep[k]) ev[k]=Object.assign({}, DEFAULTS[k], ep[k]); });
+    }
+  }catch(e){}
+  render(ev);
+})();
 </script>
 </body>
 </html>

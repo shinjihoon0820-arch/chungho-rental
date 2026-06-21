@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이벤트 관리자 - 청호나이스</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  body{font-family:'Pretendard',system-ui,sans-serif;background:#f1f5f9;color:#0f172a;}
+  input,textarea{font-size:14px}
+  .fld{width:100%;border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px}
+  .lbl{display:block;font-size:12px;font-weight:600;color:#475569;margin:8px 0 3px}
+  .box{border:1px solid #e2e8f0;border-radius:10px;padding:12px;margin-bottom:10px;background:#fff}
+  .sec h3{font-size:15px;font-weight:800;margin:0 0 8px;padding-bottom:6px;border-bottom:2px solid #e2e8f0}
+  .sec{margin-bottom:18px}
+  .delb{float:right;color:#ef4444;font-size:12px;font-weight:700;border:1px solid #fecaca;background:#fef2f2;border-radius:6px;padding:3px 8px}
+  .addb{margin-top:8px;width:100%;color:#2563eb;font-weight:700;border:1px dashed #93c5fd;background:#eff6ff;border-radius:8px;padding:8px}
+</style>
+</head>
+<body>
+<div class="max-w-xl mx-auto p-4">
+  <div class="bg-blue-600 text-white rounded-2xl px-5 py-4 mb-4">
+    <h1 class="text-lg font-extrabold">🎉 이벤트 페이지 관리</h1>
+    <p class="text-blue-100 text-xs mt-1">내용을 수정하고 맨 아래 '저장하기'를 누르세요.</p>
+  </div>
+
+  <div id="loadnote" class="text-center text-slate-500 py-10">불러오는 중...</div>
+  <div id="editor" style="display:none"></div>
+
+  <div id="savebar" style="display:none" class="sticky bottom-0 bg-white border-t mt-4 -mx-4 px-4 py-3">
+    <label class="lbl">비밀번호</label>
+    <input type="password" id="pw" class="fld mb-2" placeholder="관리자 비밀번호">
+    <button id="saveBtn" class="w-full bg-blue-600 text-white font-extrabold py-3 rounded-xl">💾 저장하기</button>
+    <p id="msg" class="text-center text-sm mt-2"></p>
+  </div>
+</div>
+
+<script>
+const DEFAULTS = {
+  monthLabel:"2026 · JUNE · 이달의 이벤트",
+  title:'6월 <span style="color:var(--blue)">최대 할인 혜택</span>을<br>받아가세요',
+  subtitle:'지금 상담 신청하시면 이번 달 한정<br><b style="color:var(--navy)">할인·사은품 혜택</b>을 바로 안내해 드려요.',
+  startDate:"2026-06-01", endDate:"2026-06-30",
+  deadlineLabel:"6월 30일 마감",
+  applyLabel:"[이벤트] 6월 무료상담",
+  chips:["🏷️ 렌탈료 반값할인","🎁 사은품 증정","🔧 설치 무료"],
+  benefits:[{emoji:"🏷️",title:"렌탈료<br>반값할인"},{emoji:"🔧",title:"설치·답사<br>무료"},{emoji:"🎁",title:"사은품<br>증정"}],
+  thanks:{title:"💙 고객 감사 이벤트", desc:"믿어주신 고객님께 드리는 이달의 감사 혜택입니다.",
+    items:[{emoji:"💸",title:"감사 추가 할인",desc:"상담 신청 고객께 이달의 추가 할인을 적용해 드립니다."},
+           {emoji:"🎁",title:"선택형 사은품",desc:"생활가전·상품권 등 원하시는 사은품을 선택하실 수 있습니다."}],
+    notice:"📢 무료 상담 신청하시면 감사 혜택을 안내해 드립니다."},
+  tradein:{title:"🔄 타사보상 이벤트", desc:"쓰시던 타사 제품, 청호나이스로 바꾸면 더 큰 혜택으로 보상.",
+    items:[{rank:"1위",name:"The M",term:"72개월 약정",normal:"45,900",sale:"36,900",off:"648,000"},
+           {rank:"2위",name:"뉴 아이스트리",term:"72개월 약정",normal:"45,900",sale:"39,900",off:"432,000"},
+           {rank:"3위",name:"슈퍼아이스트리",term:"60개월 약정",normal:"61,900",sale:"47,900",off:"840,000"}]},
+  combo:{title:"⭐ 인기상품 이벤트", desc:"함께 쓰면 혜택도 PLUS. 이달의 인기 조합.",
+    items:[{name:"BEST 조합",term:"72개월 약정",aName:"The M 얼음정수기",aPrice:"45,900",bName:"비데 B360",bPrice:"15,900",normalTotal:"61,800",saleTotal:"50,800",save:"792,000",total:""},
+           {name:"가정용 실속형 냉온정수기 조합",term:"",aName:"직수형 냉온정수기",aPrice:"19,900",bName:"비데 B360",bPrice:"12,900",normalTotal:"",saleTotal:"",save:"",total:"32,800"},
+           {name:"가정용 실속형 얼음정수기 조합",term:"",aName:"OMNI 얼음정수기",aPrice:"31,900",bName:"비데 B360",bPrice:"12,900",normalTotal:"",saleTotal:"",save:"",total:"44,800"}]},
+  business:{title:"🏢 사업자 할인", desc:"매장·사무실·사업장 맞춤 컨설팅과 사업자 전용 조건.",
+    items:[{emoji:"📋",title:"맞춤 견적·무료 답사"},{emoji:"🤝",title:"사업자 전용 조건"},{emoji:"🎧",title:"전담 사후관리"},{emoji:"📦",title:"다대수 패키지"}]}
+};
+
+const clone=o=>JSON.parse(JSON.stringify(o));
+const escA=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+function getByPath(o,p){return p.split(".").reduce((a,k)=>a==null?a:a[/^\d+$/.test(k)?+k:k],o);}
+function setByPath(o,p,v){const ks=p.split(".");let a=o;for(let i=0;i<ks.length-1;i++){const k=/^\d+$/.test(ks[i])?+ks[i]:ks[i];a=a[k];}const last=ks[ks.length-1];a[/^\d+$/.test(last)?+last:last]=v;}
+function mergeDefaults(ep){const s=clone(DEFAULTS);if(!ep||typeof ep!=="object")return s;
+  ["monthLabel","title","subtitle","deadlineLabel","startDate","endDate","applyLabel"].forEach(k=>{if(ep[k]!=null)s[k]=ep[k];});
+  if(Array.isArray(ep.chips))s.chips=clone(ep.chips);
+  if(Array.isArray(ep.benefits))s.benefits=clone(ep.benefits);
+  ["thanks","tradein","combo","business"].forEach(k=>{if(ep[k]){s[k]=Object.assign({},s[k],ep[k]);if(Array.isArray(ep[k].items))s[k].items=clone(ep[k].items);}});
+  return s;}
+const TMPL={"chips":()=>"🎁 새 혜택","benefits":()=>({emoji:"✨",title:"새 혜택"}),
+  "thanks.items":()=>({emoji:"🎁",title:"혜택 제목",desc:"혜택 설명"}),
+  "tradein.items":()=>({rank:"",name:"제품명",term:"60개월 약정",normal:"0",sale:"0",off:"0"}),
+  "combo.items":()=>({name:"새 조합",term:"",aName:"제품1",aPrice:"0",bName:"제품2",bPrice:"0",normalTotal:"",saleTotal:"",save:"",total:"0"}),
+  "business.items":()=>({emoji:"✨",title:"항목 제목"})};
+
+let state=null;
+const lbl=t=>`<label class="lbl">${t}</label>`;
+const inp=(p,v)=>`<input data-path="${p}" value="${escA(v)}" class="fld">`;
+const fld=(l,p,v)=>lbl(l)+inp(p,v);
+const tah=(l,p,v)=>lbl(l)+`<textarea data-path="${p}" rows="2" class="fld">${escA(v)}</textarea>`;
+const del=p=>`<button data-del="${p}" type="button" class="delb">삭제</button>`;
+const add=(list,t)=>`<button data-add="${list}" type="button" class="addb">＋ ${t} 추가</button>`;
+const box=h=>`<div class="box">${h}</div>`;
+const sec=(t,h)=>`<div class="sec"><h3>${t}</h3>${h}</div>`;
+
+function renderEditor(){
+  const s=state; let h="";
+  h+=sec("📌 기본 정보", box(
+    fld("상단 월 표기","monthLabel",s.monthLabel)+tah("큰 제목","title",s.title)+tah("작은 설명","subtitle",s.subtitle)+
+    fld("마감 문구","deadlineLabel",s.deadlineLabel)+
+    `<div style="display:flex;gap:8px"><div style="flex:1">${lbl("시작일")}<input type="date" data-path="startDate" value="${escA(s.startDate)}" class="fld"></div><div style="flex:1">${lbl("종료일")}<input type="date" data-path="endDate" value="${escA(s.endDate)}" class="fld"></div></div>`+
+    fld("신청 구분 이름","applyLabel",s.applyLabel)));
+  h+=sec("🏷️ 상단 혜택 칩", s.chips.map((c,i)=>box(del("chips."+i)+lbl("칩 "+(i+1))+inp("chips."+i,c))).join("")+add("chips","칩"));
+  h+=sec("⭐ 핵심 혜택 카드", s.benefits.map((b,i)=>box(del("benefits."+i)+`<div style="display:flex;gap:8px"><div style="width:70px">${lbl("이모지")}${inp("benefits."+i+".emoji",b.emoji)}</div><div style="flex:1">${lbl("제목(줄바꿈 &lt;br&gt;)")}${inp("benefits."+i+".title",b.title)}</div></div>`)).join("")+add("benefits","혜택"));
+  h+=sec("💙 고객감사 탭", box(fld("탭 제목","thanks.title",s.thanks.title)+tah("탭 설명","thanks.desc",s.thanks.desc))+
+    s.thanks.items.map((it,i)=>box(del("thanks.items."+i)+`<div style="display:flex;gap:8px"><div style="width:70px">${lbl("이모지")}${inp("thanks.items."+i+".emoji",it.emoji)}</div><div style="flex:1">${lbl("제목")}${inp("thanks.items."+i+".title",it.title)}</div></div>`+tah("설명","thanks.items."+i+".desc",it.desc))).join("")+add("thanks.items","항목")+
+    box(lbl("하단 안내 문구")+inp("thanks.notice",s.thanks.notice)));
+  h+=sec("🔄 타사보상 탭", box(fld("탭 제목","tradein.title",s.tradein.title)+tah("탭 설명","tradein.desc",s.tradein.desc))+
+    s.tradein.items.map((it,i)=>box(del("tradein.items."+i)+`<div style="display:flex;gap:8px"><div style="width:70px">${lbl("순위")}${inp("tradein.items."+i+".rank",it.rank)}</div><div style="flex:1">${lbl("제품명")}${inp("tradein.items."+i+".name",it.name)}</div></div>`+fld("약정","tradein.items."+i+".term",it.term)+`<div style="display:flex;gap:8px"><div style="flex:1">${lbl("정상가(월)")}${inp("tradein.items."+i+".normal",it.normal)}</div><div style="flex:1">${lbl("적용가(월)")}${inp("tradein.items."+i+".sale",it.sale)}</div></div>`+fld("최대 할인액","tradein.items."+i+".off",it.off))).join("")+add("tradein.items","제품"));
+  h+=sec("🛒 인기상품(조합) 탭", `<div style="font-size:12px;color:#64748b;background:#f1f5f9;border-radius:8px;padding:8px 10px;margin-bottom:10px">※ <b>할인형</b>: 정상합계·할인합계·절약액 입력 / <b>실속형</b>: 합계금액만 입력</div>`+
+    box(fld("탭 제목","combo.title",s.combo.title)+tah("탭 설명","combo.desc",s.combo.desc))+
+    s.combo.items.map((it,i)=>box(del("combo.items."+i)+fld("조합 이름","combo.items."+i+".name",it.name)+fld("약정(선택)","combo.items."+i+".term",it.term)+`<div style="display:flex;gap:8px"><div style="flex:1">${lbl("제품1 이름")}${inp("combo.items."+i+".aName",it.aName)}</div><div style="width:90px">${lbl("월요금")}${inp("combo.items."+i+".aPrice",it.aPrice)}</div></div><div style="display:flex;gap:8px"><div style="flex:1">${lbl("제품2 이름")}${inp("combo.items."+i+".bName",it.bName)}</div><div style="width:90px">${lbl("월요금")}${inp("combo.items."+i+".bPrice",it.bPrice)}</div></div><div style="display:flex;gap:6px"><div style="flex:1">${lbl("정상합계")}${inp("combo.items."+i+".normalTotal",it.normalTotal)}</div><div style="flex:1">${lbl("할인합계")}${inp("combo.items."+i+".saleTotal",it.saleTotal)}</div><div style="flex:1">${lbl("절약액")}${inp("combo.items."+i+".save",it.save)}</div></div>`+fld("합계금액(실속형)","combo.items."+i+".total",it.total))).join("")+add("combo.items","조합"));
+  h+=sec("🏢 사업자 탭", box(fld("탭 제목","business.title",s.business.title)+tah("탭 설명","business.desc",s.business.desc))+
+    s.business.items.map((it,i)=>box(del("business.items."+i)+`<div style="display:flex;gap:8px"><div style="width:70px">${lbl("이모지")}${inp("business.items."+i+".emoji",it.emoji)}</div><div style="flex:1">${lbl("제목")}${inp("business.items."+i+".title",it.title)}</div></div>`)).join("")+add("business.items","항목"));
+  document.getElementById("editor").innerHTML=h;
+}
+
+document.getElementById("editor").addEventListener("input",e=>{const p=e.target.getAttribute("data-path");if(p)setByPath(state,p,e.target.value);});
+document.getElementById("editor").addEventListener("click",e=>{
+  const a=e.target.getAttribute("data-add"), d=e.target.getAttribute("data-del");
+  if(a){getByPath(state,a).push(clone(typeof TMPL[a]==="function"?TMPL[a]():""));renderEditor();}
+  if(d){const idx=+d.split(".").pop();const lp=d.substring(0,d.lastIndexOf("."));getByPath(state,lp).splice(idx,1);renderEditor();}
+});
+
+document.getElementById("saveBtn").addEventListener("click",async()=>{
+  const pw=document.getElementById("pw").value;
+  const msg=document.getElementById("msg");
+  if(!pw){msg.style.color="#ef4444";msg.textContent="비밀번호를 입력하세요.";return;}
+  const btn=document.getElementById("saveBtn");btn.disabled=true;btn.textContent="저장 중...";
+  msg.textContent="";
+  try{
+    const r=await fetch("/api/event",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pw,eventPage:state})});
+    const j=await r.json();
+    if(j.ok){msg.style.color="#16a34a";msg.textContent="✅ 저장되었습니다! 이벤트 페이지에 반영됩니다.";}
+    else{msg.style.color="#ef4444";msg.textContent="❌ "+(j.error||"저장 실패");}
+  }catch(e){msg.style.color="#ef4444";msg.textContent="❌ 통신 오류. 다시 시도해주세요.";}
+  finally{btn.disabled=false;btn.textContent="💾 저장하기";}
+});
+
+(async function(){
+  let ep={};
+  try{const r=await fetch("/api/event",{cache:"no-store"});ep=await r.json();}catch(e){}
+  state=mergeDefaults(ep&&Object.keys(ep).length?ep:null);
+  document.getElementById("loadnote").style.display="none";
+  document.getElementById("editor").style.display="block";
+  document.getElementById("savebar").style.display="block";
+  renderEditor();
+})();
+</script>
+</body>
+</html>
