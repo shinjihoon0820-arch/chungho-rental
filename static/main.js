@@ -2505,7 +2505,8 @@ function setupEventListeners() {
         await axios.post('/api/applications', {
           name,
           phone,
-          productId: 0,
+          productId: null,
+          productName: '[빠른상담] 메인배너',
           address: '',
           message: `렌탈 상담 신청 (마케팅동의: ${marketingConsent ? '예' : '아니오'})`
         });
